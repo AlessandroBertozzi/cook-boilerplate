@@ -1,7 +1,7 @@
 import time
 from tqdm import tqdm
 from src.utilis import save_to_json, load_from_json, check_and_create_dir, delete_file
-from src.scraper.custom import gz_scrapers
+from src.scraper import gz_scrapers
 import os
 import json
 
@@ -29,7 +29,7 @@ def extract_urls_recipes(output_dir: str, time_sleep: int, n_pages=440) -> list[
     return all_recipes_urls
 
 
-def extract_recipes_info(all_recipes_urls: list[str], output_dir: str, time_sleep: int):
+def extract_recipes_info(all_recipes_urls: list[str], output_dir: str, time_sleep: int, n_files_already_processed: int):
     check_and_create_dir(f"{output_dir}/recipes_json")
     rec_scraper = gz_scrapers.GZRecipeScraper()
 
@@ -47,11 +47,11 @@ def extract_recipes_info(all_recipes_urls: list[str], output_dir: str, time_slee
         # Save every 100 iterations and at the end
         if (i + 1) % 100 == 0 or i + 1 == len(all_recipes_urls):
             chunk_n += 1
-            save_to_json(all_recipes, f'{output_dir}/recipes_json/all_recipes_{chunk_n}.json')
+            save_to_json(all_recipes, f'{output_dir}/recipes_json/all_recipes_{chunk_n + n_files_already_processed}.json')
             all_recipes = list()
 
 
-def extract_links_from_json_dir(directory) -> list[str]:
+def extract_links_from_json_dir(directory) -> (list[str], int):
     """
     Extract links from JSON files in the specified directory.
 
@@ -62,8 +62,10 @@ def extract_links_from_json_dir(directory) -> list[str]:
     - list: A list of links extracted from the JSON files.
     """
     links = []
+    n_files = 0
     try:
         for filename in os.listdir(directory):
+            n_files += 1
             if filename.endswith('.json'):
                 filepath = os.path.join(directory, filename)
                 with open(filepath, 'r') as file:
@@ -73,16 +75,16 @@ def extract_links_from_json_dir(directory) -> list[str]:
                             links.append(item['link'])
     except FileNotFoundError:
         pass
-    return links
+    return links, n_files
 
 
 def run_pipeline(output_dir, time_sleep=2, n_pages=440, delete_cached_files=False):
     check_and_create_dir(output_dir)
 
     recipes_urls = extract_urls_recipes(output_dir, time_sleep, n_pages=n_pages)
-    already_processed_recipes_urls = extract_links_from_json_dir(f"{output_dir}/recipes_json")
+    already_processed_recipes_urls, n_files = extract_links_from_json_dir(f"{output_dir}/recipes_json")
     recipes_urls = list(set(recipes_urls) - set(already_processed_recipes_urls))
-    extract_recipes_info(recipes_urls, output_dir, time_sleep)
+    extract_recipes_info(recipes_urls, output_dir, time_sleep, n_files)
 
     if delete_cached_files:
         delete_file(f"{output_dir}/recipes_urls.json")

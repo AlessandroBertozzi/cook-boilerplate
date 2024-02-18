@@ -22,7 +22,7 @@ class ElasticsearchIndexer(ABC):
         self.index_name = index_name
 
     @abstractmethod
-    def prepare_data(self, data):
+    def _prepare_data(self, data):
         """
         Prepare data for indexing into Elasticsearch.
 
@@ -35,7 +35,31 @@ class ElasticsearchIndexer(ABC):
         pass
 
     @abstractmethod
+    def _format_for_bulk_indexing(self, documents):
+        """
+        Prepare data for indexing into Elasticsearch.
+
+        This method should be implemented by concrete classes to transform raw data into
+        a format suitable for Elasticsearch indexing.
+
+        :param documents: Data that has been prepared for indexing.
+        """
+        pass
+
+    @abstractmethod
     def index_data(self, prepared_data):
+        """
+        Index prepared data into Elasticsearch.
+
+        This method should be implemented by concrete classes to perform the actual
+        indexing operation using the Elasticsearch client.
+
+        :param prepared_data: Data that has been prepared for indexing.
+        """
+        pass
+
+    @abstractmethod
+    def bulk_data(self, prepared_data):
         """
         Index prepared data into Elasticsearch.
 

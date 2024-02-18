@@ -1,4 +1,4 @@
-from src.scraper.interface import Scraper
+from src.interface.scraper import Scraper
 import requests
 from bs4 import BeautifulSoup
 import re

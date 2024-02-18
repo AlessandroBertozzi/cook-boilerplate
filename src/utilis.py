@@ -1,5 +1,16 @@
 import json
 import os
+import glob
+
+
+def find_json_files(directory):
+    # Create a pattern for matching JSON files
+    pattern = os.path.join(directory, '*.json')
+
+    # Use glob.glob to find all files in the directory matching the pattern
+    json_files = glob.glob(pattern)
+
+    return json_files
 
 
 # Function to save data to a JSON file
