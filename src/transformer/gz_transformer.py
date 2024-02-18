@@ -2,7 +2,7 @@ import json
 from openai import OpenAI
 import os
 
-os.environ["OPENAI_API_KEY"] = "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"
+os.environ["OPENAI_API_KEY"] = ""
 
 INGREDIENTS_CATEGORY = """
       Altri ingredienti
